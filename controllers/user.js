@@ -224,23 +224,45 @@ exports.updateUserById = async (req, res) => {
          });
       }
 
-      // Hash password
-      const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash(
-         password,
-         salt
-      );
+      let updatedData = {};
+
+      // Check if email field exists and update data in updateData object
+      if (email) {
+         updatedData.email = email;
+      }
+
+      // Check if password field exists and update data in updateData object
+      if (password) {
+         const salt = await bcrypt.genSalt(10);
+         const hashedPassword = await bcrypt.hash(
+            password,
+            salt
+         );
+
+         updatedData.password = hashedPassword;
+      }
+
+      // Check if username field exists and update data in updateData object
+      if (username) {
+         updatedData.username = username;
+      }
+
+      // Validate updated data
+      const { error } = validateRegister(updatedData);
+
+      if (error) {
+         return res.status(400).json({
+            success: false,
+            error: error.details[0].message,
+         });
+      }
 
       // Update user
       const updatedUser = await prisma.user.update({
          where: {
             id: req.user.id,
          },
-         data: {
-            email,
-            password: hashedPassword,
-            username,
-         },
+         data: updatedData,
       });
 
       // Return success response
