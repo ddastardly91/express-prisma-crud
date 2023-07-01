@@ -22,13 +22,28 @@ model User {
   posts Post[]
 }
 
-model Post {
+model Category {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  slug      String   @unique
-  title     String
-  content   String
-  author    User     @relation(fields: [authorId], references: [id])
-  authorId  String   @db.ObjectId
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  postIDs String[] @db.ObjectId
+  posts   Post[]   @relation(fields: [postIDs], references: [id])
+}
+
+model Post {
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  slug     String @unique
+  title    String
+  content  String
+  imageURL String
+
+  categoryIDs String[]   @db.ObjectId
+  categories  Category[] @relation(fields: [categoryIDs], references: [id])
+  author      User       @relation(fields: [authorId], references: [id])
+  authorId    String     @db.ObjectId
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
